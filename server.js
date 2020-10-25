@@ -26,8 +26,8 @@ function handelLocation(req, res) {
   }catch(error){
 
     return res.status(500).json({
-      status: 'error',
-      message: 'Internal Server Error'
+      status: 500,
+      responseText: "Sorry, something went wrong",
     });
   }
 
@@ -57,8 +57,8 @@ function handelWeather(req, res) {
   }catch(error){
 
     return res.status(500).json({
-      status: 'error',
-      message: 'Internal Server Error'
+      status: 500,
+      responseText: "Sorry, something went wrong",
     });
   }
 
