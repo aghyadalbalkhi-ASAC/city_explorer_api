@@ -16,12 +16,21 @@ app.get('/location', handelLocation);
 
 function handelLocation(req, res) {
 
+  try{
+    let city = req.query.city;
+    let josnData = require('./data/location.json');
+    let josnObject = josnData[0];
+    let locationObject = new Location(city, josnObject.display_name, josnObject.lat, josnObject.lon);
+    res.status(200).json(locationObject);
 
-  let city = req.query.city;
-  let josnData = require('./data/location.json');
-  let josnObject = josnData[0];
-  let locationObject = new Location(city, josnObject.display_name, josnObject.lat, josnObject.lon);
-  res.status(200).json(locationObject);
+  }catch(error){
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal Server Error'
+    });
+  }
+
 
 }
 
@@ -31,19 +40,28 @@ app.get('/weather', handelWeather);
 
 function handelWeather(req, res) {
 
-  let arrayOfDays=[];
+  try{
+    let arrayOfDays=[];
 
-  //   let weather = req.query.weather;
-  let josnData = require('./data/weather.json');
+    //   let weather = req.query.weather;
+    let josnData = require('./data/weather.json');
 
-  let josnObject = josnData.data;
+    let josnObject = josnData.data;
 
-  josnObject.forEach((value)=>{
+    josnObject.forEach((value)=>{
 
-    let weatherDay = new WeatherDay(value.weather.description ,value.datetime );
-    arrayOfDays.push(weatherDay);
-  });
-  res.send(arrayOfDays);
+      let weatherDay = new WeatherDay(value.weather.description ,value.datetime );
+      arrayOfDays.push(weatherDay);
+    });
+    res.send(arrayOfDays);
+  }catch(error){
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal Server Error'
+    });
+  }
+
 
 }
 
@@ -54,7 +72,7 @@ function WeatherDay(forecast, time) {
 }
 
 
-// Location Constructor Funcation  
+// Location Constructor Funcation
 function Location(search_query, formatted_query, latitude, longitude) {
   this.search_query = search_query;
   this.formatted_query = formatted_query;
