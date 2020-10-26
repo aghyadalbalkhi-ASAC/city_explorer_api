@@ -7,7 +7,7 @@ app.use(cors());
 require('dotenv').config();
 const PORT = process.env.PORT;            //Get the PORT Value From Env File 
 
-
+let currentcity='amman';
 
 // Location Get Method 
 app.get('/location', handelLocation);             // include The Path and the handelFunction which is Location
@@ -15,6 +15,7 @@ app.get('/location', handelLocation);             // include The Path and the ha
 function handelLocation(req, res) {
 
   let city = req.query.city;        //    get the City from URL Pramameter using query 
+  currentcity=city;
   const KEY =process.env.KEY;         //Get the KEY Value From Env File 
 
   // use the superagent for API Request (The URL Requested).then(arrow funcation (callback) which recive the data back from api)
@@ -37,32 +38,31 @@ function handelLocation(req, res) {
 
 }
 
-
+//https://api.weatherbit.io/v2.0/forecast/daily?city=Raleigh,NC&key=71b466b89b734b6d8c5566794767010f
 // weather Get Method 
 app.get('/weather', handelWeather);
 
 function handelWeather(req, res) {
 
-  try{
+  let cityName = currentcity;
+  let WKEY = process.env.WKEY;
 
-    //   let weather = req.query.weather;
-    let josnData = require('./data/weather.json');
+  superagent.get(`https://api.weatherbit.io/v2.0/forecast/daily?city=${cityName}&key=${WKEY}`)
+    .then(data =>{
+      let josnObject = data.body.data;
 
-    let josnObject = josnData.data;
+      let arrayOfDays = josnObject.map( (day) => {
+        let weatherDayObject = new WeatherDay(day.weather.description ,day.datetime );
+        return weatherDayObject;
 
-    let arrayOfDays = josnObject.map( (day) => {
-      return new WeatherDay(day.weather.description ,day.datetime );
-    });
-
-    res.send(arrayOfDays);
-  }catch(error){
-
-    return res.status(500).json({
-      status: 500,
-      responseText: "Sorry, something went wrong",
-    });
-  }
-
+      });
+      res.send(arrayOfDays);
+    }).catch(()=>{
+      res.status(500).json({
+        status: 500,
+        responseText: "Sorry, something went wrong",
+      });
+    } );
 
 }
 
