@@ -22,7 +22,7 @@ function handelLocation(req, res) {
     .then(data =>{
       let josnObject = data.body[0];        //Store the data that back from API server  // Body where the reviced data stored
       let locationObject = new Location(city, josnObject.display_name, josnObject.lat, josnObject.lon);
-      console.log(locationObject);
+
       res.status(200).json(locationObject);
     }).catch(()=>{
       res.status(500).json({
@@ -44,18 +44,16 @@ app.get('/weather', handelWeather);
 function handelWeather(req, res) {
 
   try{
-    let arrayOfDays=[];
 
     //   let weather = req.query.weather;
     let josnData = require('./data/weather.json');
 
     let josnObject = josnData.data;
 
-    josnObject.forEach((value)=>{
-
-      let weatherDay = new WeatherDay(value.weather.description ,value.datetime );
-      arrayOfDays.push(weatherDay);
+    let arrayOfDays = josnObject.map( (day) => {
+      return new WeatherDay(day.weather.description ,day.datetime );
     });
+
     res.send(arrayOfDays);
   }catch(error){
 
