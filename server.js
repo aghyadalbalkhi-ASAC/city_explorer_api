@@ -73,7 +73,14 @@ function handelLocation(city, req, res) {
 
       let inserStetment = `INSERT INTO locations (search_query , formatted_query , latitude , longitude) VALUES ('${locationObject.search_query}','${locationObject.formatted_query}','${josnObject.lat}','${josnObject.lon}');`;
 
-      client.query(inserStetment).then();
+      client.query(inserStetment).then().catch( err =>{
+        res.status(500).json({
+          status: 500,
+          responseText: 'Sorry, something went wrong',
+        });
+      }
+
+      );
 
       res.status(200).json(locationObject);
     }).catch((error) => {
