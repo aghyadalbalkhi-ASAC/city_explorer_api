@@ -36,7 +36,6 @@ function checklocation(req, res) {
   let city = req.query.city;
   let statment = `SELECT search_query,formatted_query,latitude,longitude FROM locations WHERE search_query='${city}';`;
   client.query(statment).then(data => {
-    console.log('cori');
     if (data.rowCount !== 0) {
       res.send(data.rows[0]);
     }
@@ -47,7 +46,7 @@ function checklocation(req, res) {
     }
 
 
-  }).catch(() => {
+  }).catch((error) => {
     res.send('error');
 
   });
@@ -69,7 +68,6 @@ function handelLocation(city, req, res) {
       //Store the data that back from API server  // Body where the reviced data stored
       let josnObject = data.body[0];
       let locationObject = new Location(city, josnObject.display_name, josnObject.lat, josnObject.lon);
-      console.log(locationObject);
       currentcitylat = josnObject.lat;
       currentcitylon = josnObject.lon;
 
@@ -78,7 +76,7 @@ function handelLocation(city, req, res) {
       client.query(inserStetment).then();
 
       res.status(200).json(locationObject);
-    }).catch(() => {
+    }).catch((error) => {
       res.status(500).json({
         status: 500,
         responseText: 'Sorry, something went wrong',
@@ -106,7 +104,7 @@ function handelWeather(req, res) {
 
       });
       res.send(arrayOfDays);
-    }).catch(() => {
+    }).catch((error) => {
       res.status(500).json({
         status: 500,
         responseText: 'Sorry, something went wrong',
@@ -130,7 +128,7 @@ function handelTrails(req, res) {
 
       });
       res.send(arrayOftrail);
-    }).catch(() => {
+    }).catch((erro) => {
       res.status(500).json({
         status: 500,
         responseText: 'Sorry, something went wrong',
