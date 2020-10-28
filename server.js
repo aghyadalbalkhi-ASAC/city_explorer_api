@@ -8,11 +8,11 @@ let pg = require('pg');
 
 //Get the PORT Value From Env File
 const PORT = process.env.PORT;
-const DB_URL = process.env.DB_URL;
+const DATABASE_URL = process.env.DATABASE_URL;
 
 // Declare App
 let app = express();
-const client = new pg.Client(DB_URL);
+const client = new pg.Client(DATABASE_URL);
 app.use(cors());
 
 
