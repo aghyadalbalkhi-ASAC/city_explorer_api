@@ -10,6 +10,10 @@ let pg = require('pg');
 const PORT = process.env.PORT;
 const DATABASE_URL = process.env.DATABASE_URL;
 const MOVIE_API_KEY = process.env.MOVIE_API_KEY;
+const YELP_API_KEY = process.env.YELP_API_KEY;
+const Client_ID_Yelp = process.env.Client_ID_Yelp;
+
+
 
 // Declare App
 let app = express();
@@ -30,6 +34,7 @@ app.get('/location', checklocation);
 app.get('/weather', handelWeather);
 app.get('/trails', handelTrails);
 app.get('/movies', handelMovies);
+app.get('/yelp', handelYelp);
 
 
 
@@ -81,15 +86,15 @@ function handelLocation(city, req, res) {
       console.log('inserStetment');
       client.query(inserStetment, values)
         .then(insertedRecord => {
-        // For Hanaa res.send(insertedRecord.rows);
+          // For Hanaa res.send(insertedRecord.rows);
           console.log('then');
         }).catch(err => {
           console.log('catch');
           // res.status(500).json({
 
-        //   status: 500,
-        //   responseText: 'Sorry, something went wrong',
-        // });
+          //   status: 500,
+          //   responseText: 'Sorry, something went wrong',
+          // });
         });
 
       res.status(200).json(locationObject);
@@ -152,13 +157,13 @@ function handelTrails(req, res) {
 
 }
 
-function handelMovies (req,res){
+function handelMovies(req, res) {
 
   let cityName = currentcity;
   console.log(cityName);
-  let urlmovie = `https://api.themoviedb.org/4/search/movie?api_key=c408f9abb4481eac47ea14de23029b76&query=${cityName}`;
+  let urlmovie = `https://api.themoviedb.org/4/search/movie?api_key=${MOVIE_API_KEY}&query=${cityName}`;
   superagent.get(urlmovie)
-    .then( moviedata =>{
+    .then(moviedata => {
 
       let josnObject = moviedata.body.results;
       let arrayOfDays = josnObject.map((movie) => {
@@ -170,24 +175,70 @@ function handelMovies (req,res){
 
       res.send(arrayOfDays);
 
-    }).catch(erro =>{
+    }).catch(erro => {
 
-      res.send('hello movies Error',erro);
+      res.send('hello movies Error', erro);
+    });
+
+
+}
+
+function handelYelp(req, res) {
+
+  let urlYelp = `https://api.yelp.com/v3/businesses/search`;
+
+  const HeaderParameter = {
+    terms: 'food',
+    location: currentcity,
+  };
+
+  superagent.get(urlYelp).query(HeaderParameter)
+    .set('Authorization', `Bearer ${YELP_API_KEY}`)
+    .then(yelpdata => {
+
+      let josnObject = yelpdata.body.businesses;
+
+      let arrayOfyelp = josnObject.map((yelp) => {
+
+        let yelpObj = new Yelp(yelp);
+        return yelpObj;
+
+      });
+
+      res.send(arrayOfyelp);
+
+
+    }).catch(err => {
+
+      res.status(500).send('Error Page in Yelp Handelling');
     });
 
 
 }
 
 
-// Weather Movies Funcatio
+//  Yelp Constructor Funcatio
+function Yelp(yelpObj) {
+  this.name = yelpObj.name;
+  this.image_url = yelpObj.image_url;
+  this.price = yelpObj.price;
+  this.rating = yelpObj.rating;
+  this.url = yelpObj.url;
+
+
+}
+
+
+
+//  Movies Constructor Funcatio
 function Movies(movie) {
-  this.title=movie.title;
-  this.overview=movie.overview;
-  this.average_votes=movie.title;
-  this.total_votes=movie.vote_count;
-  this.image_url=movie.poster_path;
-  this.popularity=movie.popularity;
-  this.released_on=movie.release_date;
+  this.title = movie.title;
+  this.overview = movie.overview;
+  this.average_votes = movie.title;
+  this.total_votes = movie.vote_count;
+  this.image_url = movie.poster_path;
+  this.popularity = movie.popularity;
+  this.released_on = movie.release_date;
 
 }
 
@@ -227,8 +278,8 @@ function Trail(trail) {
 
 
 
-client.connect().then(()=>{
-  app.listen(PORT, ()=>{
+client.connect().then(() => {
+  app.listen(PORT, () => {
     console.log(`App listening to port ${PORT}`);
   });
 });
