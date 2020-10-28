@@ -9,6 +9,7 @@ let pg = require('pg');
 //Get the PORT Value From Env File
 const PORT = process.env.PORT;
 const DATABASE_URL = process.env.DATABASE_URL;
+const MOVIE_API_KEY = process.env.MOVIE_API_KEY;
 
 // Declare App
 let app = express();
@@ -28,17 +29,20 @@ let currentcitylon = '';
 app.get('/location', checklocation);
 app.get('/weather', handelWeather);
 app.get('/trails', handelTrails);
-// app.get('/DB', handelDB);
+app.get('/movies', handelMovies);
 
 
 
 function checklocation(req, res) {
   console.log('checklocation');
   let city = req.query.city;
+  currentcity = city;
   let statment = `SELECT search_query,formatted_query,latitude,longitude FROM locations WHERE search_query='${city}';`;
   client.query(statment).then(data => {
     if (data.rowCount !== 0) {
-      console.log('data');
+      currentcitylat = data.rows[0].latitude;
+      currentcitylon = data.rows[0].longitude;
+
       res.send(data.rows[0]);
     }
 
@@ -60,7 +64,6 @@ function checklocation(req, res) {
 
 function handelLocation(city, req, res) {
   //Get the City from URL Pramameter using query
-  currentcity = city;
   const KEY = process.env.KEY;
   console.log('handelLocation');
   // use the superagent for API Request (The URL Requested).then(arrow funcation (callback) which recive the data back from api)
@@ -130,7 +133,6 @@ function handelWeather(req, res) {
 function handelTrails(req, res) {
 
   let TRILSKEY = process.env.TRILSKEY;
-  console.log(currentcitylat, currentcitylon);
   superagent.get(`https://www.hikingproject.com/data/get-trails?lat=${currentcitylat}&lon=${currentcitylon}&maxDistance=1000&key=${TRILSKEY}`)
     .then(data => {
       let josnObject = data.body.trails;
@@ -150,6 +152,44 @@ function handelTrails(req, res) {
 
 }
 
+function handelMovies (req,res){
+
+  let cityName = currentcity;
+  console.log(cityName);
+  let urlmovie = `https://api.themoviedb.org/4/search/movie?api_key=c408f9abb4481eac47ea14de23029b76&query=${cityName}`;
+  superagent.get(urlmovie)
+    .then( moviedata =>{
+
+      let josnObject = moviedata.body.results;
+      let arrayOfDays = josnObject.map((movie) => {
+        let movieObj = new Movies(movie);
+
+        return movieObj;
+
+      });
+
+      res.send(arrayOfDays);
+
+    }).catch(erro =>{
+
+      res.send('hello movies Error',erro);
+    });
+
+
+}
+
+
+// Weather Movies Funcatio
+function Movies(movie) {
+  this.title=movie.title;
+  this.overview=movie.overview;
+  this.average_votes=movie.title;
+  this.total_votes=movie.vote_count;
+  this.image_url=movie.poster_path;
+  this.popularity=movie.popularity;
+  this.released_on=movie.release_date;
+
+}
 
 
 // Weather Constructor Funcatio
