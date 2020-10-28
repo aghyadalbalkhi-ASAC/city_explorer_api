@@ -8,11 +8,11 @@ let pg = require('pg');
 
 //Get the PORT Value From Env File
 const PORT = process.env.PORT;
-const DB_URL = process.env.DB_URL;
+const DATABASE_URL = process.env.DATABASE_URL;
 
 // Declare App
 let app = express();
-const client = new pg.Client(DB_URL);
+const client = new pg.Client(DATABASE_URL);
 app.use(cors());
 
 
@@ -43,12 +43,13 @@ function checklocation(req, res) {
     }
 
     else {
-    console.log('handelLocation');
+      console.log('handelLocation from checkerlocation');
       handelLocation(city, req, res);
     }
 
 
   }).catch((error) => {
+    console.log('catch Data');
     res.send('error');
 
   });
@@ -60,7 +61,6 @@ function checklocation(req, res) {
 function handelLocation(city, req, res) {
   //Get the City from URL Pramameter using query
   currentcity = city;
-  //Get the KEY Value From Env File
   const KEY = process.env.KEY;
   console.log('handelLocation');
   // use the superagent for API Request (The URL Requested).then(arrow funcation (callback) which recive the data back from api)
@@ -74,21 +74,20 @@ function handelLocation(city, req, res) {
       currentcitylon = josnObject.lon;
 
       let inserStetment = `INSERT INTO locations (search_query , formatted_query , latitude , longitude) VALUES ($1,$2,$3,$4) RETURNING *;`;
-      let values = [city,josnObject.display_name, josnObject.lat, josnObject.lon];
+      let values = [city, josnObject.display_name, josnObject.lat, josnObject.lon];
       console.log('inserStetment');
-      client.query(inserStetment,values).then(insertedRecord =>{
+      client.query(inserStetment, values)
+        .then(insertedRecord => {
         // For Hanaa res.send(insertedRecord.rows);
-        console.log('then');
-      }).catch( err =>{
-        console.log('catch');
-        // res.status(500).json({
+          console.log('then');
+        }).catch(err => {
+          console.log('catch');
+          // res.status(500).json({
 
         //   status: 500,
         //   responseText: 'Sorry, something went wrong',
         // });
-      }
-
-      );
+        });
 
       res.status(200).json(locationObject);
     }).catch((error) => {
@@ -102,7 +101,6 @@ function handelLocation(city, req, res) {
 
 }
 // weather Get Method
-
 
 function handelWeather(req, res) {
 
@@ -189,12 +187,10 @@ function Trail(trail) {
 
 
 
-
-client.connect().then(() => {
-  app.listen(PORT, () => {
-    console.log(`The Port is ${PORT}`);
+client.connect().then(()=>{
+  app.listen(PORT, ()=>{
+    console.log(`App listening to port ${PORT}`);
   });
-
+}).catch(err =>{
+  console.log('Sorry ... and error occured ..', err);
 });
-
-
