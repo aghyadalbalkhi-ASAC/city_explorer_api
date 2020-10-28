@@ -191,6 +191,7 @@ client.connect().then(()=>{
   app.listen(PORT, ()=>{
     console.log(`App listening to port ${PORT}`);
   });
-}).catch(err =>{
-  console.log('Sorry ... and error occured ..', err);
 });
+// .catch(err =>{
+//   console.log('Sorry ... and error occured ..', err);
+// });
