@@ -186,10 +186,14 @@ function handelMovies(req, res) {
 function handelYelp(req, res) {
 
   let urlYelp = `https://api.yelp.com/v3/businesses/search`;
-
+  let page = req.query.page;
+  let pagNum = 5;
+  let beginnigPage = (page-1)*pagNum;
   const HeaderParameter = {
     terms: 'food',
+    limit : 5,
     location: currentcity,
+    offset : beginnigPage,
   };
 
   superagent.get(urlYelp).query(HeaderParameter)
@@ -197,7 +201,6 @@ function handelYelp(req, res) {
     .then(yelpdata => {
 
       let josnObject = yelpdata.body.businesses;
-
       let arrayOfyelp = josnObject.map((yelp) => {
 
         let yelpObj = new Yelp(yelp);
@@ -210,7 +213,7 @@ function handelYelp(req, res) {
 
     }).catch(err => {
 
-      res.status(500).send('Error Page in Yelp Handelling');
+      res.status(500).send('Error Page in Yelp Handelling',err);
     });
 
 
@@ -282,7 +285,6 @@ client.connect().then(() => {
   app.listen(PORT, () => {
     console.log(`App listening to port ${PORT}`);
   });
+}).catch(err =>{
+  console.log('Sorry ... and error occured ..', err);
 });
-// .catch(err =>{
-//   console.log('Sorry ... and error occured ..', err);
-// });
